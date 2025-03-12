@@ -1,0 +1,9 @@
+uvicorn==0.34.0
+fastapi==0.115.11
+openai==1.66.2
+dotenv==0.9.9
+numpy==2.0.2
+uuid==1.30
+faiss-cpu==1.10.0
+langchain==0.3.20
+wikipedia-api

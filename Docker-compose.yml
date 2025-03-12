@@ -1,0 +1,11 @@
+services:
+  chat-app:
+    container_name: chat_app
+    image: chat_app:v1.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
