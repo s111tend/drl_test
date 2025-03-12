@@ -4,7 +4,7 @@
 The task is to create an application with an API (FastAPI) that will have THREE routes inside and a background task processor. The application must gather data about the requested topic from Wikipedia, structure it, and place it into the TXT file (named by the given `document_id`) in the local `data/documents` folder.   
 On the other side, it is necessary to implement a route to chat with ChatGPT using the information from a specified document and previous chat history. To have a chat history, it is necessary to work with an additional folder `data/sessions` to store conversation history into a JSON file named with a given `session_id` (on the structure chat history in the JSON file, you decide on your own).
 
-# Environment variables
+## Environment variables
 Before running the application, you need to set the following environment variables in `.env` file:
 
 ```
@@ -34,7 +34,7 @@ You can also use some additional parameters if you want:
     GPT_MODEL=... # standard: gpt-4
 ```
 
-# Running instructions
+## Running instructions
 
 After clonning the repository, you can build and run it with docker using Dockerfile:
 
@@ -106,12 +106,12 @@ JSON Response format:
 ```
 
 
-# Implementation details
+## Implementation details
 
-## Retrivement of relevent information
+### Retrivement of relevent information
 Since the search for relevant information should be carried out on the text of a particular document, saving and selecting this information is as follows:
 1. When saving information into a document, the embedding of each chapter of the document is saved in a single vector database, and an index map is created to obtain embedding indices related to a particular chapter of a particular document.
 2. When selecting the required information, the two most relevant chapters of the document to which the question refers are found first. The text from these chapters is then divided into small passages and the most relevant passages are selected using a time vector database, which are then used to obtain the desired answer.
 
-## AI agent settings
+### AI agent settings
 If there is no chatting session with given id, the application creates a new one with message to agent from system. This message contains instructions how to deal with situation when found context from document is not enough to answer question. In this case the agent will answer that it doesn't have enaugh information and it will try to answer by itself.
