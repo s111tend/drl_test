@@ -76,48 +76,36 @@ class ChatManager:
 
             :return: str
         """
-        code = 200
+        # get relevant ccontext from document
+        document_sections = self._get_document_sections(document_id)
+        relevant_context = self.retriever.get_relevant_context(document_id, document_sections, inputs)
+        if relevant_context is None:
+            relevant_context = "No context found."
 
-        try:
-            # get relevant ccontext from document
-            document_sections = self._get_document_sections(document_id)
-            relevant_context = self.retriever.get_relevant_context(document_id, document_sections, inputs)
-            if relevant_context is None:
-                relevant_context = "No context found."
+        # get chat history
+        chat_history = self.get_chat_history(session_id)
 
-            # get chat history
-            chat_history = self.get_chat_history(session_id)
+        # compose user message
+        user_message = {
+            "role": "user", 
+            "content": f"Answer the question: {inputs}\n\nHere is some relevant information: {relevant_context}"
+        }
+        chat_history['messages'].append(user_message)
 
-            # compose user message
-            user_message = {
-                "role": "user", 
-                "content": f"Answer the question: {inputs}\n\nHere is some relevant information: {relevant_context}"
-            }
-            chat_history['messages'].append(user_message)
+    
+        # get response from OpenAI
+        self._check_openai_client()
+        response = self.get_openai_response(chat_history['messages'])
+        assistant_message = {
+            "role": "assistant", 
+            "content": response
+        }
+        chat_history['messages'].append(assistant_message)
 
-        
-            # get response from OpenAI
-            self._check_openai_client()
-            response = self.get_openai_response(chat_history['messages'])
-            assistant_message = {
-                "role": "assistant", 
-                "content": response
-            }
-            chat_history['messages'].append(assistant_message)
+        # save chat history accorading to the user message and agent's response
+        self.save_chat_history(session_id, chat_history)
 
-            # save chat history accorading to the user message and agent's response
-            self.save_chat_history(session_id, chat_history)
-        except FileNotFoundError as e:
-            logging.error(f"Incorrect document_id: {document_id}")
-            response = f'Document with id {document_id} not found.'
-            code = 404
-        except Exception as e:
-            # if error occured, return None and log error
-            logging.error(f"Error: {e}")
-            response = None
-            code = 520
-
-        return response, code
+        return response
     
     def _get_document_sections(self, document_id: str) -> list:
         """

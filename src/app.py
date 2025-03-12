@@ -107,12 +107,28 @@ async def chat(inputs: ChatInputs):
     :return: bot response
     """
 
-    # get chat response
-    response, code = chat_manager.get_chat_response(
-        session_id=inputs.session_id, 
-        document_id=inputs.document_id, 
-        inputs=inputs.text
-    )
+    response = None
+    code = 200
+
+    try:
+        # get chat response
+        response = chat_manager.get_chat_response(
+            session_id=inputs.session_id, 
+            document_id=inputs.document_id, 
+            inputs=inputs.text
+        )
+    except FileNotFoundError:
+        response = f"Document with id: {inputs.document_id} not found."
+        logging.error(response)
+        code = 404
+    except ValueError:
+        response = "Something is wrong with our AI agent. Sorry :("
+        logging.error("OpenAI client is not initialized.")
+        code = 503
+    except Exception as e:
+        response = "Error occured on server... Try again later."
+        code = 520
+
 
     return {"response": response}, code
 

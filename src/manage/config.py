@@ -20,3 +20,11 @@ class Config:
 
     GPT_MODEL = os.getenv('GPT_MODEL', 'gpt-4o-mini')
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+    # EMBEDDING MODEL SETTINGS
+    CHUNK_SIZE = 150
+    CHUNK_OVERLAP = 50
+
+    # RETRIEVEMENT SETTINGS
+    TOP_K1 = 2
+    TOP_K2 = 4

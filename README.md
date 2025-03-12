@@ -111,7 +111,7 @@ JSON Response format:
 ### Retrivement of relevent information
 Since the search for relevant information should be carried out on the text of a particular document, saving and selecting this information is as follows:
 1. When saving information into a document, the embedding of each chapter of the document is saved in a single vector database, and an index map is created to obtain embedding indices related to a particular chapter of a particular document.
-2. When selecting the required information, the two most relevant chapters of the document to which the question refers are found first. The text from these chapters is then divided into small passages and the most relevant passages are selected using a time vector database, which are then used to obtain the desired answer.
+2. When selecting the required information, the top-k1 most relevant chapters of the document to which the question refers are found first. The text from these chapters is then divided into small passages and the most relevant top-k2 passages are selected, which are then used to obtain the desired answer. (default top-k1=2, top-k2=4. You can change it in Config file)
 
 ### AI agent settings
 If there is no chatting session with given id, the application creates a new one with message to agent from system. This message contains instructions how to deal with situation when found context from document is not enough to answer question. In this case the agent will answer that it doesn't have enaugh information and it will try to answer by itself.

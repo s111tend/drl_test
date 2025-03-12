@@ -18,8 +18,8 @@ class Retriever:
         self.index_map_path = None 
         self.text_splitter = RecursiveCharacterTextSplitter(
             ['.', '?', '!'],
-            chunk_size=150,
-            chunk_overlap=50,
+            chunk_size=Config.CHUNK_SIZE,
+            chunk_overlap=Config.CHUNK_OVERLAP,
             length_function=len,
             is_separator_regex=False,
         )
@@ -127,8 +127,8 @@ class Retriever:
     def get_relevant_context(self, document_id: str, document_sections: list, input: str) -> str:
         """
             Retrieve relevant information from the document's context.
-            First it finds the most relevant sections (top_k = 2) of document, next it searches 
-            for the most relevant chunks of the document using temporal faiss index (top_k = 5)
+            First it finds the most relevant sections (top_k = 1) of document, next it searches 
+            for the most relevant chunks of the document using temporal faiss index (top_k = 3)
 
             :param document_id: str
             :param document_sections: list
@@ -157,7 +157,7 @@ class Retriever:
             logging.error(f"Error in 'get_relevant_context' function: {e}")
             return None
 
-    def get_most_relevant_sections(self, document_id: str, input_embedding: np.ndarray, top_k: int = 2) -> list:
+    def get_most_relevant_sections(self, document_id: str, input_embedding: np.ndarray, top_k: int = Config.TOP_K1) -> list:
         """
             Find most relevant sections of the document using faiss index.
 
@@ -174,9 +174,9 @@ class Retriever:
         # return section ids as they were in document
         return np.argwhere(np.isin(sections_indices, indices)).flatten().tolist()[:top_k]
 
-    def get_topk_context_chunks(self, relevant_text: str, input_embedding: np.ndarray, top_k: int = 5) -> list:
+    def get_topk_context_chunks(self, relevant_text: str, input_embedding: np.ndarray, top_k: int = Config.TOP_K2) -> list:
         """
-            Get top k context chunks of the document' section using temporal faiss index.
+            Get top k context chunks of the document' section.
 
             :param relevant_text: str
             :param input_embedding: np.ndarray
@@ -189,14 +189,9 @@ class Retriever:
         # vectorize it and normalize
         chunks_embeddings = self.get_text_embeddings(chunks)
         chunks_embeddings = Retriever.normalize_vectors(chunks_embeddings)
-        # create index
-        index = faiss.IndexFlatIP(self.emb_size)
-        # add embeddings to index
-        index.add(chunks_embeddings)
-        # search top k most relevant
-        distances, indices = index.search(input_embedding, top_k)
-        # find them in text
-        indices = indices[indices >= 0]
-        context_chunks = [chunks[id] for id in indices.flatten().tolist()]
+        # find top-k most relevant context chunks
+        cosine_similarities = np.dot(chunks_embeddings, input_embedding.T).flatten()
+        top_k_indices = np.argsort(cosine_similarities)[::-1].tolist()[:top_k]
+        context_chunks = [chunks[id] for id in top_k_indices]
         # return them
         return context_chunks

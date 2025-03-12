@@ -66,7 +66,7 @@ class TaskManager:
 
             :param task_id: str
 
-            :return: status of the task ('pending', 'running', 'finished', 'failed')
+            :return: status of the task ('pending', 'running', 'finished', 'failed' and None if task_id is incorrect)
         """
         status = self.tasks.get(task_id)
         if status is None:
@@ -81,7 +81,7 @@ class TaskManager:
             :param topic: str - requested topic of the Wikipedia page
             :param document_id: str - id of the document to store the content
         """
-        # check if task is in tasks dictionary
+        # check if task is in tasks dictionary.
         if self.get_task_status(task_id) is None:
             return
         
